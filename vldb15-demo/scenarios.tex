@@ -6,12 +6,13 @@ how \sys enables the rapid iterative construction of data cleaning plans
 and the ability to transfer workflows between similar dirty datasets.
 
 \subsection{Datasets}
-In our demo, we will consider entity resolution tasks on two different restaurant datasets.
-The first dataset contains 858 Zagat reviews\footnote{\scriptsize{ \url{www.cs.utexas.edu/users/ml/riddle/data/restaurant.tar.gz}}},
+In our demo, we will consider cleaning workflows on three different datasets.
+The first dataset contains 858 Zagat reviews\footnote{\scriptsize{ \url{cs.utexas.edu/users/ml/riddle/data/restaurant.tar.gz}}},
 each tagged with the cuisine of the restaurant reviewed (e.g. ``Chinese" or ``French").
-The second dataset is from Yelp and contains 58,127 restaurant records that are also tagged with a category.
-In both datasets, tags are inconsistent across records, e.g. ``Chinese" vs. ``Chinese Cuisine".
-We will use \sys to merge similar categories together and find the top 10 most popular categories in the dataset.
+The second dataset, which is similar to the first, is from Yelp and contains 58,127 restaurant records that are also tagged with a category.
+The third dataset consists of $3,049,914$ records of liquor sales from the state of Iowa\footnote{\scriptsize{\url{data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}}}, including the store where the purchase occurred and the items and cost of the purchase.
+In all three datasets, categorical columns are inconsistent across records (e.g. cuisine tags for ``Chinese" vs. ``Chinese Cuisine"), records are duplicated, and formatting errors abound. 
+We will use \sys to resolve these errors and run aggregate queries over the cleaned datasets.
 
 \begin{figure}[t]
 \centering
@@ -29,31 +30,24 @@ We will use \sys to merge similar categories together and find the top 10 most p
 
 \subsection{Demo Walkthrough}
 Now, we will detail the steps of the proposed demonstration.
-A screenshot of our dashboard interface is illustrated in Figure \ref{screenshot}.
+A screenshot of our dashboard interface is illustrated in Figure~\ref{screenshot}.
 
 \vspace{0.2em}
 
-\noindent\textbf{Step 1: } We will explain the components of our dashboard interface to the
-demo participants, including how to design data cleaning plans with the visual 
-drop down menus, how to compile those plans to our DSL, and how to evaluate the results.
+\noindent\textbf{Step 1: } Participants will select a dataset (e.g., the Zagat dataset), and load a pre-populated data cleaning plan and target query for it.
+Participants will be able to manually tune the plan by choosing between Similarity Join implementations, adjusting their thresholds, and adding a crowdsourced filtering step in addition to similarity thresholding.
 
 \vspace{0.2em}
 
-\noindent\textbf{Step 2: } Our dashboard will be pre-populated with a data cleaning plan for tag deduplication, and will
-start off with the Zagat restaurant dataset. Participants will have the option of choosing one of two Similarity Join implementations, Edit Distance and Jaccard Similarity, and can tune the thresholds for either.
-Participants can also add a crowdsourced filtering step in addition to similarity thresholding. 
+\noindent\textbf{Step 2: } At all times, the demo interface will display a representative sample of the input and output data for the cleaning plan as well as the results of the target query, allowing the participant to understand how cleaning affects the data. 
+If a plan modification adds a crowdsourcing step, participants can complete crowd tasks in \sys's crowd interface.
 
 \vspace{0.2em}
 
-\noindent\textbf{Step 3: } When a participant is satisfied with a plan, they can hit ``Approve" to execute the data cleaning. 
-If they chose to use crowdsourcing, then they can complete crowd tasks. 
-The results of the plan are visualized in the upper right of our interface.
-We show a representative sample of changed records allowing the participant to understand how cleaning affects the data. 
-Participants can further analyze their plan by clicking on an operator (Figure \ref{screenshot-rec}).
-In addition to the parameters, this shows the recommended changes to the operator.
-For example, Figure \ref{screenshot-rec}, shows a recommendation to change the similarity metric from Jaccard to Edit Distance since the attribute in question does not have many tokens.
+\noindent\textbf{Step 3:} Participants can further analyze their plan by clicking on an operator (Figure~\ref{screenshot-rec}).
+This view will show the system's recommended changes to the operator and allow the participant to make those changes easily.
+For example, Figure~\ref{screenshot-rec} shows a recommendation to change the similarity metric from Jaccard to Edit Distance since the attribute in question does not have many tokens.
 
 \vspace{0.2em}
 
-\noindent\textbf{Step 4: } Participants can then switch datasets and observe how the same plan performs on another dataset.
-They can modify the plan using the visual interface until the results are satisfactory.
+\noindent\textbf{Step 4: } Participants can then switch datasets. Switching between restaurant datasets (Zagat and Yelp) demonstrates how the same plan can perform on another dataset, while switching to the alcohol dataset demonstrates that \sys is effective in multiple data domains.
