@@ -12,7 +12,7 @@ each tagged with the cuisine of the restaurant reviewed (e.g. ``Chinese" or ``Fr
 The second dataset, which is similar to the first, is from Yelp and contains 58,127 restaurant records that are also tagged with a category.
 The third dataset consists of $3,049,914$ records of liquor sales from the state of Iowa\footnote{\scriptsize{\url{data.iowa.gov/Economy/Iowa-Liquor-Sales/m3tr-qhgy}}}, including the store where the purchase occurred and the items and cost of the purchase.
 In all three datasets, categorical columns are inconsistent across records (e.g. cuisine tags for ``Chinese" vs. ``Chinese Cuisine"), records are duplicated, and formatting errors abound. 
-We will use \sys to resolve these errors and run aggregate queries over the cleaned datasets.
+We will use \sys to resolve these errors using Extraction and Entity Resolution, then run aggregate queries over the cleaned datasets.
 
 \begin{figure}[t]
 \centering
