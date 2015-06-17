@@ -5,22 +5,24 @@ To support evolving data quality needs, there are three main research challenges
 \subsection{Sampling}
 In prior work, we explored the problem of estimating aggregate query results over dirty data ~\cite{wang1999sample}.
 In SampleClean \cite{wang1999sample}, we found that aggregate queries can often be answered with very high accuracy (i.e 99\%) with only a small fraction of clean data, and we can clean just enough for the application's data quality requirements.
-In the context of the iterative design, data analysts often run aggregate queries, e.g., count the number of Chinese restaurants, on a new data source to assess the quality of the data.
 In \sys, we implement sampling as a logical operator that can be used for quickly prototyping and optimizing workflows on samples of data and then transferring these optimizations to full datasets.
-We leverage our prior work to design tools that tune parameters, provide recommendations, and estimate the significance of cleaning.
-
+We find that many important features of iterative data cleaning workflows can be posed as aggregate queries on samples with confidence intervals.
+If we want to know whether a data cleaning operation has a significant effect, we can use a query to test the effects of this operation on a sample.
+For example, if we are deduplicating restaurant categories, we can count the number of Chinese restaurants in a sample to test if different deduplication algorithms significantly affect the count.
+Sampling and result estimation are salient features of \sys that allow us tune parameters and provide recommendations for chaning a workflow without evaluating all possible workflows on the full data.
+Next, we will discuss how we can efficiently generate these recommendations.
 
 \subsection{Recommendation}
 We also have implemented a basic recommendation engine that recommends changes to a data cleaning plan based on user feedback. 
-A user can specify a set of ground truth records, and our system will optimize over data cleaning plans that best reproduces the ground truth.
+A user can specify a set of ground truth tuples, and our system will optimize over data cleaning plans that best reproduces the ground truth.
 There are three types of recommendations: (1) parameter change, (2) operator replacement, and (3) operator addition.
 
 \vspace{.5em}
 
-\textit{Parameter Change.} Many of the physical operators in \sys have tunable parameters, whose values is often very dataset-specific, and the user feedback gives us a way to evaluate the quality of the initial parameter choice. 
+\textit{Parameter Change.} Many of the physical operators in \sys have tunable parameters, whose values are often very dataset-specific, and the user feedback gives us a way to evaluate the quality of the initial parameter choice. 
 For example, Similarity Joins have a similarity threshold and a similarity function. 
 Increasing this threshold reduces the selectivity of the join, and \sys chooses a threshold that maximizes accuracy. 
-This problem can solved by a minimum-cost spanning tree over a similarity graph (edges represent non-zero similarity) over records.
+This problem can be solved by a minimum-cost spanning tree over a similarity graph (edges represent non-zero similarity) over tuples.
 
 \vspace{.5em}
 
@@ -33,10 +35,19 @@ Additionally, we can try different variants of automated operators to test how a
 \vspace{.5em}
 
 \textit{Operator Addition.}  There are also cases where we may want to add another physical operator, while still preserving the logical input-output behavior of the workflow.
-It is common in extraction tasks to have most records accurately extracted with an automated extractor but only a small subset requiring additional inspection. 
+It is common in extraction tasks to have most tuples accurately extracted with an automated extractor but only a small subset requiring additional inspection. 
 For these cases, we can add a crowd-based Filter operator to separate these examples for additional cleaning.
 
 \vspace{.5em}
+
+\textit{Cost Estimates.} Of course, changing plans when using crowdsourcing may significantly change its cost.
+For every recommendation, we estimate the number of additional tuples processed by the crowd operators and provide the user with an estimated cost.
+Based on a user-specified cost per task, we estimate the number of tasks needed to clean the dataset.
+
+\vspace{.5em}
+
+To actually realize and execute the recommendations, we have to implement some functionality in our system.
+In particular, we efficiently re-evaluate a workflow that has been modified in a small way.
 
 \textit{Caching} allows for result re-use if a downstream operator is modified or added.
 If the system has sufficient memory, then we can cache all of the intermediate results. 
@@ -46,15 +57,8 @@ When we make a recommendation for a change, we must cache the preceding operator
 
 \vspace{.5em}
 
-\textit{Cost Estimates} Of course, changing plans when using crowdsourcing may significantly change its cost.
-For every recommendation, we estimate the number of additional tuples processed by the crowd operators and provide the user with an estimated cost.
-Based on a user-specified cost per task, we estimate the number of tasks needed to clean the dataset.
-
-\vspace{.5em}
-
 \textit{Lineage} allows us to understand how results change if upstream operators are modified.
-For example, decreasing a similarity join threshold increases the number of output pairs, but %adding an additional filtering step 
-reduces the number of output tuples. The key property here is monotonicity, and some types of monotone \textsf{Filter} and \textsf{SimilarityJoin} are data cleaning analogs for a Select-Join relational algebra.
+For example, decreasing a similarity join threshold increases the number of output pairs without affecting existing output pairs. The key property here is monotonicity, and some types of monotone \textsf{Filter} and \textsf{SimilarityJoin} are data cleaning analogs for a Select-Join relational algebra.
 We can therefore model upstream hot-swapping as an incremental view maintenance problem and update the 
 final result based on the insertion or deletion of tuples earlier in the plan.
 
@@ -79,7 +83,7 @@ final result based on the insertion or deletion of tuples earlier in the plan.
 
 %{\noindent \bf Sampling:} One way to reduce operator latency is to reduce the number of tuples each operator processes.
 %In \sys, sampling is a first-class logical operator that can be used for quickly prototyping and optimizing workflows on samples of data and then transfering these optimizations to full datasets.
-%Sampling allows for quick introspection of otherwise opaque components, such as testing the quality of a crowd with a small set of records.
+%Sampling allows for quick introspection of otherwise opaque components, such as testing the quality of a crowd with a small set of tuples.
 %\sys also provides the statistical tools to extrapolate (with confidence intervals) the insights learned on a sample.
 %The problem of estimating aggregate query results over dirty data has been investigated in prior work~\cite{wang1999sample}, 
 %addressing the challenge that data cleaning may change the underlying statistics of a sample.
@@ -134,7 +138,7 @@ We currently support Support Vector Machines and Decision Trees with a featuriza
 \vspace{0.5em}
 
 \noindent \textsf{Filter(R, $\mathcal{T}^+$, $\mathcal{T}^-$)}: Given a set of positive training examples $\mathcal{T}^+$ (i.e, $r$ that satisfy the condition) and
-negative training examples $\mathcal{T}^-$ (i.e, r that do not satisfy the condition), we learn a classifier that predicts whether a record satisfies the condition. 
+negative training examples $\mathcal{T}^-$ (i.e, r that do not satisfy the condition), we learn a classifier that predicts whether a tuple satisfies the condition. 
 
 \vspace{0.5em}
 
