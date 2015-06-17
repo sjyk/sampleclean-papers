@@ -16,6 +16,7 @@ Next, we will discuss how we can efficiently generate these recommendations.
 We also have implemented a basic recommendation engine that recommends changes to a data cleaning plan based on user feedback. 
 A user can specify a set of ground truth tuples, and our system will optimize over data cleaning plans that best reproduces the ground truth.
 There are three types of recommendations: (1) parameter change, (2) operator replacement, and (3) operator addition.
+To actually realize and execute the recommendations, we use \emph{caching} and {lineage} to efficiently re-evaluate a workflow.
 
 \vspace{.5em}
 
@@ -45,9 +46,6 @@ For every recommendation, we estimate the number of additional tuples processed 
 Based on a user-specified cost per task, we estimate the number of tasks needed to clean the dataset.
 
 \vspace{.5em}
-
-To actually realize and execute the recommendations, we have to implement some functionality in our system.
-In particular, we efficiently re-evaluate a workflow that has been modified in a small way.
 
 \textit{Caching} allows for result re-use if a downstream operator is modified or added.
 If the system has sufficient memory, then we can cache all of the intermediate results. 
